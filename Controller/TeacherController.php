@@ -43,4 +43,28 @@ class TeacherController extends BaseController{
         header("Location: /interview/teachers");
         exit;
     }
+    public function editForm($id){
+        $teacher = $this->teacherService->findByID($id);
+        $this->render("teacher/edit",[
+            "title" => "Chỉnh sửa giáo viên",
+            "teacher" => $teacher
+        ]);
+    }
+    public function update(){
+        $teacher = new Teacher(
+            $_POST['id'],
+            $_POST['name'],
+            $_POST['email'],
+            $_POST['phone']
+        );
+        $this->teacherService->update($teacher);
+        header("Location: /interview/teachers");
+        exit();
+    }
+    public function delete(){
+        $id = $_POST['id'];
+        $this->teacherService->delete($id);        
+        header("Location: /interview/teachers");
+        exit;
+    }
 }

@@ -44,6 +44,16 @@ switch (true) {
     case $uri === '/teachers' && $method === 'POST':
         (new TeacherController())->store();
         break;
+        break;
+    case $uri === '/teachers/delete' && $method === 'POST':
+        (new TeacherController())->delete();
+        break;
+    case preg_match('#^/teachers/edit/(\d+)$#', $uri, $matches) && $method === 'GET':
+        (new TeacherController())->editForm((int)$matches[1]);
+        break;
+    case $uri === '/teachers/update' && $method === 'POST':
+        (new TeacherController())->update();
+        break;
 
 
     /** -------- COURSES -------- */

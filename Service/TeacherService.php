@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Service;
 
 use App\Model\Teacher;
@@ -29,20 +30,22 @@ class TeacherService
     }
 
     // Lấy teacher theo id
-    public function getTeacherById($id)
+    public function findByID($id)
     {
         return $this->teacherRepository->getById($id);
     }
 
     // Cập nhật teacher
-    public function updateTeacher($id, $name, $email, $phone)
+    public function update($teacher)
     {
-        $teacher = new Teacher($id, $name, $email, $phone);
+        if (empty($teacher->name) || empty($teacher->email) || empty($teacher->phone)) {
+            throw new \Exception("Invalid data");
+        }
         return $this->teacherRepository->update($teacher);
     }
 
     // Xóa teacher
-    public function deleteTeacher($id)
+    public function delete($id)
     {
         return $this->teacherRepository->delete($id);
     }

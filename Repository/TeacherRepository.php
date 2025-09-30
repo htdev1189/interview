@@ -16,7 +16,7 @@ class TeacherRepository
 
     public function getAll()
     {
-        $result = $this->connection->query("SELECT * FROM teachers");
+        $result = $this->connection->query("SELECT * FROM teachers where status = 1");
         $teachers = [];
         while ($row = $result->fetch_assoc()) {
             $teachers[] = new Teacher($row['id'], $row['name'], $row['email'], $row['phone'], $row['created_at']);
@@ -42,7 +42,7 @@ class TeacherRepository
 
     public function delete($id)
     {
-        $sql = "DELETE FROM teachers WHERE id=?";
+        $sql = "UPDATE teachers set status = 0 WHERE id=?";
         $stmt = $this->connection->prepare($sql);
         $stmt->bind_param("i", $id);
         return $stmt->execute();

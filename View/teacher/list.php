@@ -2,8 +2,8 @@
 <?php ob_start(); ?>
 <div class="alert alert-primary alert-sm" role="alert">
   <div class="row">
-    <div class="col-md-10"><?= $title ?></div>
-    <div class="col-md-2 text-end"><a href="/interview/teachers/create" class="btn btn-success btn-sm">Add New</a></div>
+    <div class="col-9"><?= $title ?></div>
+    <div class="col-3 text-end"><a href="/interview/teachers/create" class="btn btn-success btn-sm">Add New</a></div>
   </div>
 </div>
 
