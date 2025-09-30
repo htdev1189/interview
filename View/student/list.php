@@ -1,0 +1,44 @@
+<!-- views/student/list.php -->
+<?php ob_start(); ?>
+<div class="alert alert-primary alert-sm" role="alert">
+  <div class="row">
+    <div class="col-md-10"><?= $title ?></div>
+    <div class="col-md-2 text-end"><a href="/interview/students/create" class="btn btn-success btn-sm">Add New</a></div>
+  </div>
+</div>
+
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">Email</th>
+      <th scope="col">Phone</th>
+      <th scope="col">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <?php foreach ($students as $student): ?>
+      <tr>
+        <th scope="row"><?= $student->id; ?></th>
+        <td><?= $student->name; ?></td>
+        <td><?= $student->email; ?></td>
+        <td><?= $student->phone; ?></td>
+        <td>
+          <a href="/interview/students/edit/<?= $student->id ?>" class="btn btn-primary btn-sm">Edit</a>
+          <form action="/interview/students/delete" method="POST" style="display:inline;"
+            onsubmit="return confirm('Bạn có chắc chắn muốn xóa sinh viên này không?');">
+            <input type="hidden" name="id" value="<?= $student->id ?>">
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        </td>
+      </tr>
+    <?php endforeach; ?>
+
+  </tbody>
+</table>
+<?php
+$content = ob_get_clean();
+include __DIR__ . '/../layout.php';
+?>

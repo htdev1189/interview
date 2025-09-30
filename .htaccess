@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Thư mục gốc của project (ví dụ /interview/php)
+    # RewriteBase /interview/php
+    RewriteBase /interview
+
+    # Nếu request không phải file hoặc thư mục thật thì đẩy về index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
