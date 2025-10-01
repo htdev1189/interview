@@ -7,7 +7,7 @@ namespace App\Controller;
 use App\Service\StudentService;
 use App\Repository\StudentRepository;
 use App\Controller\BaseController;
-
+use App\Http\Request\StudentRequest;
 use App\Model\Student;
 use App\Repository\CourseRepository;
 use App\Service\CourseService;
@@ -78,28 +78,33 @@ class StudentController extends BaseController
     }
     public function store()
     {
-
-        // Theo kiến trúc MVC + Service + Repository, 
-        // thì Controller chính là nơi “gom dữ liệu từ request” và chuyển nó thành Model (ở đây là Student) để chuyền qua Service.
-        $student = new Student(
-            null,
-            $_POST['name'],
-            $_POST['email'],
-            $_POST['phone'],
-            null
-        );
-        $this->studentService->createStudent($student);
-        header("Location: /interview/students");
-        exit;
+        try {
+            $student = StudentRequest::fromPost($_POST);
+            $this->studentService->createStudent($student);
+            $_SESSION['success'] = "create student success !!!";
+            header("Location: /interview/students");
+            exit;
+        } catch (\Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+            header("Location: /interview/students");
+            exit;
+            // $this->render("student/error", [
+            //     "title" => "Thêm mới sinh viên",
+            //     "error" => $e->getMessage()
+            // ]);
+        }
     }
 
     public function editForm($id)
     {
-        $student = (new StudentService(new StudentRepository()))->getStudentById($id);
+        $student = $this->studentService->getStudentById($id);
         if (!$student) {
-            echo "Không tìm thấy sinh viên.";
+            $this->render("error/404", [
+                "error" => "Không tìm thấy sinh viên"
+            ]);
             return;
         }
+
         $this->render('student/edit', [
             'title'    => 'Cập nhật thông tin sinh viên',
             'student' => $student
@@ -108,25 +113,37 @@ class StudentController extends BaseController
 
     public function update()
     {
-        $student = new Student(
-            $_POST['id'],
-            $_POST['name'],
-            $_POST['email'],
-            $_POST['phone'],
-            null
-        );
-
-        $this->studentService->updateStudent($student);
-        header("Location: /interview/students");
-        exit;
+        try {
+            $student = StudentRequest::fromPost($_POST);
+            $this->studentService->updateStudent($student);
+            $_SESSION['success'] = "update student success !!!";
+            header("Location: /interview/students");
+            exit;
+        } catch (\Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+            header("Location: /interview/students");
+            exit;
+        }
     }
     public function delete()
     {
         $id = $_POST['id'];
-        // Xử lý xóa sinh viên theo id
-        $this->studentService->deleteStudent($id);
-        header("Location: /interview/students");
-        exit;
+        $student = $this->studentService->getStudentById($id);
+        if (!$student) {
+            $this->render("error/404", [
+                "error" => "Không tìm thấy sinh viên"
+            ]);
+            return;
+        }
+        try {
+            $this->studentService->deleteStudent($id);
+            header("Location: /interview/students");
+            exit;
+        } catch (\Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+            header("Location: /interview/students");
+            exit;
+        }
     }
 
     // register course form

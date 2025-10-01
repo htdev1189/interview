@@ -17,7 +17,7 @@ class StudentRepository
     // find all students
     public function findAll()
     {
-        $sql = "select * from students";
+        $sql = "select * from students where status = 1";
         $result = $this->connection->query($sql);
         $students = [];
         if ($result->num_rows > 0) {
@@ -27,7 +27,8 @@ class StudentRepository
                     $row['name'],
                     $row['email'],
                     $row['phone'],
-                    $row['created_at']
+                    $row['created_at'],
+                    $row['status']
                 );
             }
         }
@@ -64,27 +65,39 @@ class StudentRepository
     // insert student
     public function create($students)
     {
-        $sql = "insert into students (name, email, phone) values (?,?,?)";
-        $stmt = $this->connection->prepare($sql);
-        $stmt->bind_param("sss", $students->name, $students->email, $students->phone);
-        return $stmt->execute();
+        try {
+            $sql = "insert into students (name, email, phone) values (?,?,?)";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param("sss", $students->name, $students->email, $students->phone);
+            return $stmt->execute();
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Lỗi khi thêm sinh viên: " . $e->getMessage());
+        }
     }
 
     // update student
     public function update($student)
     {
-        $sql = "update students set name = ?, email = ?, phone = ? where id = ?";
-        $stmt = $this->connection->prepare($sql);
-        $stmt->bind_param("sssi", $student->name, $student->email, $student->phone, $student->id);
-        return $stmt->execute();
+        try {
+            $sql = "update students set name = ?, email = ?, phone = ? where id = ?";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param("sssi", $student->name, $student->email, $student->phone, $student->id);
+            return $stmt->execute();
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
     }
     // delete student
     public function delete($id)
     {
-        $sql = "delete from students where id = ?";
-        $stmt = $this->connection->prepare($sql);
-        $stmt->bind_param("i", $id);
-        return $stmt->execute();
+        try {
+            $sql = "update students set status = 0 where id = ?";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param("i", $id);
+            return $stmt->execute();
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
     }
 
     public function registerCourse($studentId, $courseId)

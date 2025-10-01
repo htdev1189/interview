@@ -35,21 +35,21 @@ class StudentService
     // create student
     public function createStudent($student)
     {
-        // validate data
-        if (empty($student->name) || empty($student->email) || empty($student->phone)) {
-            throw new \Exception("Invalid data");
+        try {
+            $this->studentRepository->create($student);
+        } catch (\RuntimeException $e) {
+            throw $e; // tiếp tục ném ra để Controller bắt
         }
-        return $this->studentRepository->create($student);
     }
 
     // update student
     public function updateStudent($student)
     {
-        // validate data
-        if (empty($student->id) || empty($student->name) || empty($student->email) || empty($student->phone)) {
-            throw new \Exception("Invalid data");
+        try {
+            return $this->studentRepository->update($student);
+        } catch (\Exception $e) {
+            throw $e;
         }
-        return $this->studentRepository->update($student);
     }
 
     // delete student

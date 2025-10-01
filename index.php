@@ -1,93 +1,45 @@
 <?php
+session_start();
 require_once __DIR__ . '/vendor/autoload.php';
 
+use App\Core\Router;
 use App\Controller\StudentController;
 use App\Controller\TeacherController;
 use App\Controller\CourseController;
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$router = new Router();
 
-// Base path (nếu project nằm trong thư mục con)
+// Students
+$router->add('GET', '#^/students$#', [new StudentController(), 'list']);
+$router->add('GET', '#^/students/create$#', [new StudentController(), 'createForm']);
+$router->add('POST', '#^/students$#', [new StudentController(), 'store']);
+$router->add('GET', '#^/students/edit/(\d+)$#', [new StudentController(), 'editForm']);
+$router->add('POST', '#^/students/update$#', [new StudentController(), 'update']);
+$router->add('POST', '#^/students/delete$#', [new StudentController(), 'delete']);
+$router->add('GET', '#^/students/view/(\d+)$#', [new StudentController(), 'view']);
+$router->add('GET', '#^/students/registerCourse$#', [new StudentController(), 'registerCourseForm']);
+$router->add('POST', '#^/students/registerCourse$#', [new StudentController(), 'registerCourse']);
+
+// Teachers
+$router->add('GET', '#^/teachers$#', [new TeacherController(), 'list']);
+$router->add('GET', '#^/teachers/create$#', [new TeacherController(), 'createForm']);
+$router->add('POST', '#^/teachers$#', [new TeacherController(), 'store']);
+$router->add('GET', '#^/teachers/edit/(\d+)$#', [new TeacherController(), 'editForm']);
+$router->add('POST', '#^/teachers/update$#', [new TeacherController(), 'update']);
+$router->add('POST', '#^/teachers/delete$#', [new TeacherController(), 'delete']);
+
+// Courses
+$router->add('GET', '#^/courses$#', [new CourseController(), 'list']);
+$router->add('GET', '#^/courses/create$#', [new CourseController(), 'createForm']);
+$router->add('POST', '#^/courses$#', [new CourseController(), 'store']);
+$router->add('GET', '#^/courses/edit/(\d+)$#', [new CourseController(), 'editForm']);
+$router->add('POST', '#^/courses/update$#', [new CourseController(), 'update']);
+$router->add('POST', '#^/courses/delete$#', [new CourseController(), 'delete']);
+
+// Dispatch
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $basePath = '/interview';
 $uri = str_replace($basePath, '', $uri);
-
 $method = $_SERVER['REQUEST_METHOD'];
 
-switch (true) {
-    /** -------- STUDENTS -------- */
-    case $uri === '/students' && $method === 'GET':
-        (new StudentController())->list();
-        break;
-    case preg_match('#^/students/edit/(\d+)$#', $uri, $matches) && $method === 'GET':
-        (new StudentController())->editForm((int)$matches[1]);
-        break;
-    case preg_match('#^/students/view/(\d+)$#', $uri, $matches) && $method === 'GET':
-        (new StudentController())->view((int)$matches[1]);
-        break;
-    case $uri === '/students/create' && $method === 'GET':
-        (new StudentController())->createForm();
-        break;
-    case $uri === '/students' && $method === 'POST':
-        (new StudentController())->store();
-        break;
-    case $uri === '/students/update' && $method === 'POST':
-        (new StudentController())->update();
-        break;
-    case $uri === '/students/delete' && $method === 'POST':
-        (new StudentController())->delete();
-        break;
-    case $uri === '/students/registerCourse' && $method === 'GET':
-        (new StudentController())->registerCourseForm();
-        break;
-    case $uri === '/students/registerCourse' && $method === 'POST':
-        (new StudentController())->registerCourse();
-        break;
-    
-    /** -------- TEACHERS -------- */
-    case $uri === '/teachers' && $method === 'GET':
-        (new TeacherController())->list();
-        break;
-    case $uri === '/teachers/create' && $method === 'GET':
-        (new TeacherController())->createForm();
-        break;
-    case $uri === '/teachers' && $method === 'POST':
-        (new TeacherController())->store();
-        break;
-        break;
-    case $uri === '/teachers/delete' && $method === 'POST':
-        (new TeacherController())->delete();
-        break;
-    case preg_match('#^/teachers/edit/(\d+)$#', $uri, $matches) && $method === 'GET':
-        (new TeacherController())->editForm((int)$matches[1]);
-        break;
-    case $uri === '/teachers/update' && $method === 'POST':
-        (new TeacherController())->update();
-        break;
-    
-
-
-    /** -------- COURSES -------- */
-    case $uri === '/courses' && $method === 'GET':
-        (new CourseController())->list();
-        break;
-    case $uri === '/courses/create' && $method === 'GET':
-        (new CourseController())->createForm();
-        break;
-    case $uri === '/courses' && $method === 'POST':
-        (new CourseController())->store();
-        break;
-    case $uri === '/courses/delete' && $method === 'POST':
-        (new CourseController())->delete();
-        break;
-    case preg_match('#^/courses/edit/(\d+)$#', $uri, $matches) && $method === 'GET':
-        (new CourseController())->editForm((int)$matches[1]);
-        break;
-    case $uri === '/courses/update' && $method === 'POST':
-        (new CourseController())->update();
-        break;
-
-    default:
-        http_response_code(404);
-        echo "404 Not Found: $uri";
-        break;
-}
+$router->dispatch($uri, $method);
