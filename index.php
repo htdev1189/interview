@@ -21,6 +21,9 @@ switch (true) {
     case preg_match('#^/students/edit/(\d+)$#', $uri, $matches) && $method === 'GET':
         (new StudentController())->editForm((int)$matches[1]);
         break;
+    case preg_match('#^/students/view/(\d+)$#', $uri, $matches) && $method === 'GET':
+        (new StudentController())->view((int)$matches[1]);
+        break;
     case $uri === '/students/create' && $method === 'GET':
         (new StudentController())->createForm();
         break;
@@ -33,7 +36,13 @@ switch (true) {
     case $uri === '/students/delete' && $method === 'POST':
         (new StudentController())->delete();
         break;
-
+    case $uri === '/students/registerCourse' && $method === 'GET':
+        (new StudentController())->registerCourseForm();
+        break;
+    case $uri === '/students/registerCourse' && $method === 'POST':
+        (new StudentController())->registerCourse();
+        break;
+    
     /** -------- TEACHERS -------- */
     case $uri === '/teachers' && $method === 'GET':
         (new TeacherController())->list();
@@ -54,6 +63,7 @@ switch (true) {
     case $uri === '/teachers/update' && $method === 'POST':
         (new TeacherController())->update();
         break;
+    
 
 
     /** -------- COURSES -------- */

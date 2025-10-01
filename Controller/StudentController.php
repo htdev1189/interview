@@ -9,16 +9,18 @@ use App\Repository\StudentRepository;
 use App\Controller\BaseController;
 
 use App\Model\Student;
-
+use App\Repository\CourseRepository;
+use App\Service\CourseService;
 
 class StudentController extends BaseController
 {
     private StudentService $studentService;
+    private CourseService $courseService;
 
     public function __construct()
     {
-        $repository = new StudentRepository();
-        $this->studentService = new StudentService($repository);
+        $this->studentService = new StudentService(new StudentRepository());
+        $this->courseService = new CourseService(new CourseRepository());
     }
 
     /** Hiển thị danh sách sinh viên */
@@ -59,7 +61,8 @@ class StudentController extends BaseController
         }
     }
 
-    public function list() {
+    public function list()
+    {
         $students = (new StudentService(new StudentRepository()))->getAllStudents();
         $this->render('student/list', [
             'title'    => 'Danh sách sinh viên',
@@ -67,12 +70,14 @@ class StudentController extends BaseController
         ]);
     }
 
-    public function createForm(){
+    public function createForm()
+    {
         $this->render('student/create', [
             'title'    => 'Thêm mới sinh viên'
         ]);
     }
-    public function store(){
+    public function store()
+    {
 
         // Theo kiến trúc MVC + Service + Repository, 
         // thì Controller chính là nơi “gom dữ liệu từ request” và chuyển nó thành Model (ở đây là Student) để chuyền qua Service.
@@ -88,7 +93,8 @@ class StudentController extends BaseController
         exit;
     }
 
-    public function editForm($id){
+    public function editForm($id)
+    {
         $student = (new StudentService(new StudentRepository()))->getStudentById($id);
         if (!$student) {
             echo "Không tìm thấy sinh viên.";
@@ -100,7 +106,8 @@ class StudentController extends BaseController
         ]);
     }
 
-    public function update(){
+    public function update()
+    {
         $student = new Student(
             $_POST['id'],
             $_POST['name'],
@@ -113,13 +120,53 @@ class StudentController extends BaseController
         header("Location: /interview/students");
         exit;
     }
-    public function delete(){
+    public function delete()
+    {
         $id = $_POST['id'];
         // Xử lý xóa sinh viên theo id
-        $this->studentService->deleteStudent($id);        
+        $this->studentService->deleteStudent($id);
         header("Location: /interview/students");
         exit;
     }
 
+    // register course form
+    public function registerCourseForm()
+    {
+        $this->render("student/registerCourse", [
+            "title" => "Đăng ký khóa học",
+            "students" => $this->studentService->getAllStudents(),
+            "courses" => $this->courseService->getAll()
+        ]);
+    }
 
+    // register course form
+    public function registerCourse()
+    {
+        $studentId = $_POST['student_id'] ?? null;
+        $courseId = $_POST['course_id'] ?? null;
+
+        $this->studentService->registerCourse($studentId, $courseId);
+        header("Location: /interview/students");
+        exit;
+    }
+
+    // view
+    public function view($id)
+    {
+
+        $student = $this->studentService->getStudentById($id);
+
+        // kiem tra ngay tai controller
+        if (!$student) {
+            // Cách 1: hiển thị 404
+            http_response_code(404);
+            echo "Student not found!";
+            return;
+        }
+
+        $this->render("student/view", [
+            "title" => "Thông tin student",
+            "student" => $this->studentService->getStudentWithCourses($id)
+        ]);
+    }
 }

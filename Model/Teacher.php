@@ -7,6 +7,7 @@ class Teacher {
     public $email;
     public $phone;
     public $created_at;
+    public $courses = []; // danh sách Student object
 
     public function __construct($id, $name, $email, $phone, $created_at = null) {
         $this->id = $id;

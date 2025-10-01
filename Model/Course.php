@@ -8,6 +8,8 @@ class Course {
     public $teacher_id;
     public $created_at;
 
+    public $students = []; // danh sách Student object
+
     public function __construct($id, $title, $description, $teacher_id, $created_at = null) {
         $this->id = $id;
         $this->title = $title;

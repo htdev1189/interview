@@ -10,6 +10,9 @@ class Student {
     public $phone;
     public $created_at;
 
+    // moi quan he
+    public $courses = [];
+
     public function __construct($id, $name, $email, $phone, $created_at) {
          $this->id = $id;
         $this->id = $id;
