@@ -37,7 +37,7 @@ class StudentService
     {
         try {
             $this->studentRepository->create($student);
-        } catch (\RuntimeException $e) {
+        } catch (\Exception $e) {
             throw $e; // tiếp tục ném ra để Controller bắt
         }
     }

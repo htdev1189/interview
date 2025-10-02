@@ -62,22 +62,54 @@ class StudentController extends Controller
             exit;
         }
     }
-    public function edit($id){
-        HKT::dd($id);
-    }
-    /** Hiển thị chi tiết 1 sinh viên */
-    public function show(int $id): void
+    public function edit($id)
     {
         $student = $this->studentService->getStudentById($id);
         if ($student) {
-            echo "ID: {$student->id}<br>";
-            echo "Name: {$student->name}<br>";
-            echo "Email: {$student->email}<br>";
-            echo "Phone: {$student->phone}<br>";
-        } else {
-            echo "Không tìm thấy sinh viên.";
+            $this->render("student/edit", [
+                'title'    => 'Chinh sua sinh viên',
+                'student' => $student
+            ]);
+            return;
+        }
+        $this->render("error/404", [
+            'error' => "Student not found !!!"
+        ]);
+    }
+
+    public function update(Request $request)
+    {
+        $student = new Student(
+            $request->input('id'),
+            $request->input('name'),
+            $request->input('email'),
+            $request->input('phone'),
+            $request->input('created_at')
+        );
+        try {
+            $this->studentService->updateStudent($student);
+            $_SESSION['success'] = "update student success !!!";
+            header("Location: /interview/students");
+            exit;
+        } catch (\Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+            header("Location: /interview/students");
+            exit;
         }
     }
+    /** Hiển thị chi tiết 1 sinh viên */
+    // public function show(int $id): void
+    // {
+    //     $student = $this->studentService->getStudentById($id);
+    //     if ($student) {
+    //         echo "ID: {$student->id}<br>";
+    //         echo "Name: {$student->name}<br>";
+    //         echo "Email: {$student->email}<br>";
+    //         echo "Phone: {$student->phone}<br>";
+    //     } else {
+    //         echo "Không tìm thấy sinh viên.";
+    //     }
+    // }
 
     /** Xử lý thêm mới sinh viên */
     // public function create(array $data): void
@@ -144,20 +176,20 @@ class StudentController extends Controller
         ]);
     }
 
-    public function update()
-    {
-        try {
-            $student = StudentRequest::fromPost($_POST);
-            $this->studentService->updateStudent($student);
-            $_SESSION['success'] = "update student success !!!";
-            header("Location: /interview/students");
-            exit;
-        } catch (\Exception $e) {
-            $_SESSION['error'] = $e->getMessage();
-            header("Location: /interview/students");
-            exit;
-        }
-    }
+    // public function update()
+    // {
+    //     try {
+    //         $student = StudentRequest::fromPost($_POST);
+    //         $this->studentService->updateStudent($student);
+    //         $_SESSION['success'] = "update student success !!!";
+    //         header("Location: /interview/students");
+    //         exit;
+    //     } catch (\Exception $e) {
+    //         $_SESSION['error'] = $e->getMessage();
+    //         header("Location: /interview/students");
+    //         exit;
+    //     }
+    // }
     public function delete()
     {
         $id = $_POST['id'];

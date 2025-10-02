@@ -161,20 +161,17 @@ class Router
     public static function dispatch(Request $request)
     {
         $method = $request->getMethod();
-        var_dump($method);
         $path   = self::normalizePath($request->getPath());
-        var_dump($path);
+
         // Lấy tất cả routes đã đăng ký cho method hiện tại
         $routes = self::$routes[$method] ?? [];
-
-        HKT::dd($routes);
 
         foreach ($routes as $route => $action) {
             // Biến {id} thành regex (?P<id>[^/]+)
             $pattern = "@^" . preg_replace('@\{([\w]+)\}@', '(?P<$1>[^/]+)', $route) . "$@";
 
             if (preg_match($pattern, $path, $matches)) {
-                // Lấy params (lọc ra chỉ giữ các key tên)
+                // Lấy params (lọc ra chỉ giữ các key string)
                 $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
                 // Tách controller & method
@@ -192,8 +189,28 @@ class Router
                         throw new \Exception("Method $methodName not found in $controllerClass");
                     }
 
-                    // Gọi action, truyền cả Request và params
-                    return call_user_func([$controller, $methodName], $request, $params);
+                    // 🚀 Auto mapping Request + params bằng Reflection
+                    $reflection = new \ReflectionMethod($controller, $methodName);
+                    $args = [];
+                    foreach ($reflection->getParameters() as $param) {
+                        // Nếu param type-hint là Request thì inject $request
+                        if (
+                            $param->getType()
+                            && !$param->getType()->isBuiltin()
+                            && $param->getType()->getName() === Request::class
+                        ) {
+                            $args[] = $request;
+                        } elseif (isset($params[$param->getName()])) {
+                            // Nếu param tồn tại trong {params}, inject giá trị
+                            $args[] = $params[$param->getName()];
+                        } else {
+                            // Nếu không có thì truyền null
+                            $args[] = null;
+                        }
+                    }
+
+                    // Gọi controller action với đúng args
+                    return call_user_func_array([$controller, $methodName], $args);
                 } catch (\Throwable $e) {
                     http_response_code(500);
                     echo "Error: " . $e->getMessage();

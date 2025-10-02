@@ -1,6 +1,7 @@
 <?php ob_start(); ?>
 <form method="post" action="/interview/students/update">
     <input type="hidden" name="id" value="<?= $student->id ?>">
+    <input type="hidden" name="created_at" value="<?= $student->created_at ?>">
   <div class="mb-3">
     <label class="form-label">Name</label>
     <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($student->name) ?>">

@@ -2,9 +2,9 @@
 declare(strict_types=1);
 session_start();
 
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 
 require_once __DIR__ . "/vendor/autoload.php";
@@ -36,6 +36,7 @@ Router::get('/students','StudentController@index');
 Router::get('/students/create','StudentController@create');
 Router::post('/students','StudentController@store');
 Router::get('/students/edit/{id}','StudentController@edit');
+Router::post('/students/update', 'StudentController@update');
 
 // teacher
 Router::get('/teachers', 'TeacherController@index');
@@ -66,5 +67,4 @@ Router::get('/courses', 'CourseController@index');
  * - Lúc này mình sẽ sử lý các dữ liệu được lưu trữ ở instane request
  */
 $request = Request::createFromGlobals();
-HKT::dd($request);
 Router::dispatch($request);

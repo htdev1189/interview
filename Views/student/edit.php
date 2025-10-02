@@ -1,4 +1,3 @@
-<?php ob_start(); ?>
 <form method="post" action="/interview/students/update">
     <input type="hidden" name="id" value="<?= $student->id ?>">
   <div class="mb-3">
@@ -15,6 +14,3 @@
   </div>
   <button type="submit" class="btn btn-success">Update</button>
 </form>
-<?php $content = ob_get_clean(); ?>
-
-<?php include __DIR__ . '/../layout.php'; ?>
