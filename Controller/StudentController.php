@@ -7,12 +7,15 @@ namespace App\Controller;
 use App\Service\StudentService;
 use App\Repository\StudentRepository;
 use App\Controller\BaseController;
+use App\Core\Controller;
+use App\Core\Request;
 use App\Http\Request\StudentRequest;
 use App\Model\Student;
 use App\Repository\CourseRepository;
 use App\Service\CourseService;
+use App\Util\HKT;
 
-class StudentController extends BaseController
+class StudentController extends Controller
 {
     private StudentService $studentService;
     private CourseService $courseService;
@@ -27,11 +30,41 @@ class StudentController extends BaseController
     public function index(): void
     {
         $students = $this->studentService->getAllStudents();
-        foreach ($students as $s) {
-            echo $s->id . " - " . $s->name . " - " . $s->email . "<br>";
-        }
+        $this->render('student/list', [
+            'title'    => 'Danh sách sinh viên',
+            'students' => $students
+        ]);
     }
 
+    public function create()
+    {
+        $this->render('student/create', [
+            'title'    => 'Thêm mới sinh viên'
+        ]);
+    }
+    public function store(Request $request)
+    {
+        $student = new Student(
+            null,
+            $request->input('name'),
+            $request->input('email'),
+            $request->input('phone'),
+            null
+        );
+        try {
+            $this->studentService->createStudent($student);
+            $_SESSION['success'] = "create student success !!!";
+            header("Location: /interview/students");
+            exit;
+        } catch (\Throwable $th) {
+            $_SESSION['error'] = "create student failed !!!";
+            header("Location: /interview/students");
+            exit;
+        }
+    }
+    public function edit($id){
+        HKT::dd($id);
+    }
     /** Hiển thị chi tiết 1 sinh viên */
     public function show(int $id): void
     {
@@ -47,19 +80,19 @@ class StudentController extends BaseController
     }
 
     /** Xử lý thêm mới sinh viên */
-    public function create(array $data): void
-    {
-        try {
-            $this->studentService->createStudent(
-                $data["name"],
-                $data["email"],
-                $data["phone"]
-            );
-            echo "Thêm sinh viên thành công!";
-        } catch (\Exception $e) {
-            echo "Lỗi: " . $e->getMessage();
-        }
-    }
+    // public function create(array $data): void
+    // {
+    //     try {
+    //         $this->studentService->createStudent(
+    //             $data["name"],
+    //             $data["email"],
+    //             $data["phone"]
+    //         );
+    //         echo "Thêm sinh viên thành công!";
+    //     } catch (\Exception $e) {
+    //         echo "Lỗi: " . $e->getMessage();
+    //     }
+    // }
 
     public function list()
     {
@@ -76,24 +109,24 @@ class StudentController extends BaseController
             'title'    => 'Thêm mới sinh viên'
         ]);
     }
-    public function store()
-    {
-        try {
-            $student = StudentRequest::fromPost($_POST);
-            $this->studentService->createStudent($student);
-            $_SESSION['success'] = "create student success !!!";
-            header("Location: /interview/students");
-            exit;
-        } catch (\Exception $e) {
-            $_SESSION['error'] = $e->getMessage();
-            header("Location: /interview/students");
-            exit;
-            // $this->render("student/error", [
-            //     "title" => "Thêm mới sinh viên",
-            //     "error" => $e->getMessage()
-            // ]);
-        }
-    }
+    // public function store()
+    // {
+    //     try {
+    //         $student = StudentRequest::fromPost($_POST);
+    //         $this->studentService->createStudent($student);
+    //         $_SESSION['success'] = "create student success !!!";
+    //         header("Location: /interview/students");
+    //         exit;
+    //     } catch (\Exception $e) {
+    //         $_SESSION['error'] = $e->getMessage();
+    //         header("Location: /interview/students");
+    //         exit;
+    //         // $this->render("student/error", [
+    //         //     "title" => "Thêm mới sinh viên",
+    //         //     "error" => $e->getMessage()
+    //         // ]);
+    //     }
+    // }
 
     public function editForm($id)
     {

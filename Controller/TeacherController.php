@@ -4,8 +4,9 @@ namespace App\Controller;
 use App\Model\Teacher;
 use App\Repository\TeacherRepository;
 use App\Service\TeacherService;
+use App\Core\Controller;
 
-class TeacherController extends BaseController{
+class TeacherController extends Controller{
     // dependency service
     private TeacherService $teacherService;
 
@@ -13,6 +14,15 @@ class TeacherController extends BaseController{
     {
         $repository = new TeacherRepository();
         $this->teacherService = new TeacherService($repository);
+    }
+
+    public function index(){
+        $teachers = $this->teacherService->getAllTeachers();
+        // render
+        $this->render("teacher/list",[
+            "title" => "Danh sách giáo viên",
+            "teachers" => $teachers
+        ]);
     }
 
     public function list(){

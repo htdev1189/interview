@@ -19,7 +19,7 @@ class TeacherRepository
         $result = $this->connection->query("SELECT * FROM teachers where status = 1");
         $teachers = [];
         while ($row = $result->fetch_assoc()) {
-            $teachers[] = new Teacher($row['id'], $row['name'], $row['email'], $row['phone'], $row['created_at']);
+            $teachers[] = new Teacher($row['id'], $row['name'], $row['email'], $row['phone'], $row['status'], $row['created_at']);
         }
         return $teachers;
     }
@@ -62,6 +62,7 @@ class TeacherRepository
                 $row['name'],
                 $row['email'],
                 $row['phone'],
+                $row['status'],
                 $row['created_at']
             );
         }

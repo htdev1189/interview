@@ -6,8 +6,9 @@ use App\Repository\CourseRepository;
 use App\Repository\TeacherRepository;
 use App\Service\CourseService;
 use App\Service\TeacherService;
+use App\Core\Controller;
 
-class CourseController extends BaseController {
+class CourseController extends Controller {
     private CourseService $courseService;
     private TeacherRepository $teacherRepository;
     public function __construct()
@@ -15,6 +16,13 @@ class CourseController extends BaseController {
         $repository = new CourseRepository();
         $this->courseService = new CourseService($repository);
         $this->teacherRepository = new TeacherRepository();
+    }
+    public function index(){
+        $cousers = $this->courseService->getAll();
+        $this->render('course/list', [
+            'title'    => 'Danh sách khóa học',
+            'courses' => $cousers
+        ]);
     }
     public function list(){
         $cousers = $this->courseService->getAll();

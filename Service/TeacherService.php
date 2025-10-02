@@ -32,7 +32,11 @@ class TeacherService
     // Lấy teacher theo id
     public function findByID($id)
     {
-        return $this->teacherRepository->getById($id);
+        $teacher = $this->teacherRepository->getById($id);
+        if ($teacher && $teacher->status == 1) {
+            return $teacher;
+        }
+        return null;
     }
 
     // Cập nhật teacher

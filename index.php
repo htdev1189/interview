@@ -1,45 +1,70 @@
-<?php
+<?php 
+declare(strict_types=1);
 session_start();
-require_once __DIR__ . '/vendor/autoload.php';
 
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+
+
+require_once __DIR__ . "/vendor/autoload.php";
+
+// util
+use App\Util\HKT;
+
+// Xử lý HTTP request (GET, POST, SERVER)
+use App\Core\Request;
+
+// Xử lý router dựa vào request
 use App\Core\Router;
-use App\Controller\StudentController;
-use App\Controller\TeacherController;
-use App\Controller\CourseController;
 
-$router = new Router();
+// .env
+use Dotenv\Dotenv;
+$envRoot = dirname(__DIR__);
+if (file_exists($envRoot . '/.env')) {
+    Dotenv::createImmutable($envRoot)->load();
+}
 
-// Students
-$router->add('GET', '#^/students$#', [new StudentController(), 'list']);
-$router->add('GET', '#^/students/create$#', [new StudentController(), 'createForm']);
-$router->add('POST', '#^/students$#', [new StudentController(), 'store']);
-$router->add('GET', '#^/students/edit/(\d+)$#', [new StudentController(), 'editForm']);
-$router->add('POST', '#^/students/update$#', [new StudentController(), 'update']);
-$router->add('POST', '#^/students/delete$#', [new StudentController(), 'delete']);
-$router->add('GET', '#^/students/view/(\d+)$#', [new StudentController(), 'view']);
-$router->add('GET', '#^/students/registerCourse$#', [new StudentController(), 'registerCourseForm']);
-$router->add('POST', '#^/students/registerCourse$#', [new StudentController(), 'registerCourse']);
+// Khai báo router gốc
+// $router = new Router();
 
-// Teachers
-$router->add('GET', '#^/teachers$#', [new TeacherController(), 'list']);
-$router->add('GET', '#^/teachers/create$#', [new TeacherController(), 'createForm']);
-$router->add('POST', '#^/teachers$#', [new TeacherController(), 'store']);
-$router->add('GET', '#^/teachers/edit/(\d+)$#', [new TeacherController(), 'editForm']);
-$router->add('POST', '#^/teachers/update$#', [new TeacherController(), 'update']);
-$router->add('POST', '#^/teachers/delete$#', [new TeacherController(), 'delete']);
+// Define routes (simple)
+Router::get('/', 'HomeController@index');
 
-// Courses
-$router->add('GET', '#^/courses$#', [new CourseController(), 'list']);
-$router->add('GET', '#^/courses/create$#', [new CourseController(), 'createForm']);
-$router->add('POST', '#^/courses$#', [new CourseController(), 'store']);
-$router->add('GET', '#^/courses/edit/(\d+)$#', [new CourseController(), 'editForm']);
-$router->add('POST', '#^/courses/update$#', [new CourseController(), 'update']);
-$router->add('POST', '#^/courses/delete$#', [new CourseController(), 'delete']);
+// student
+Router::get('/students','StudentController@index');
+Router::get('/students/create','StudentController@create');
+Router::post('/students','StudentController@store');
+Router::get('/students/edit/{id}','StudentController@edit');
+
+// teacher
+Router::get('/teachers', 'TeacherController@index');
+
+// course
+Router::get('/courses', 'CourseController@index');
+
+// $router->get('/students', 'StudentController@index');
 
 // Dispatch
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$basePath = '/interview';
-$uri = str_replace($basePath, '', $uri);
-$method = $_SERVER['REQUEST_METHOD'];
 
-$router->dispatch($uri, $method);
+/**
+ * Giải thích xíu chỗ này
+ * 
+ * giả sử như đường dẫn là http://localhost:8080/students/create
+ * - Gọi hàm Request::createFromGlobals
+ *      - tạo 1 instance của Request, chứa Method = GET, Path = students/create
+ * - Router::get('/students/create','StudentController@create');
+ * - Khớp route GET /students/create nên nó sẽ chạy hàm create trong class StudentController
+ * - đây là hàm hiển thị form 
+ * 
+ * 
+ * Ok giờ submit qua http://localhost:8080/students với phương thức POST
+ * - thì lúc này cũng về lại file index và chạy tiếp Request::createFromGlobals
+ *      - tạo 1 instance của Request, chứa Method = POST, Path = /students
+ * - Router::post('/students','StudentController@store');
+ * - Khớp route POST /students nên nó sẽ chạy hàm store trong class StudentController
+ * - Lúc này mình sẽ sử lý các dữ liệu được lưu trữ ở instane request
+ */
+$request = Request::createFromGlobals();
+HKT::dd($request);
+Router::dispatch($request);
