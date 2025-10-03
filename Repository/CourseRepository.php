@@ -28,18 +28,22 @@ class CourseRepository
 
     public function create(Course $course)
     {
-        $sql = "INSERT INTO courses (title, description, teacher_id) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO courses (title, slug, description, teacher_id) VALUES (?, ?, ?)";
         $stmt = $this->connection->prepare($sql);
-        $stmt->bind_param("ssi", $course->title, $course->description, $course->teacher_id);
+        $stmt->bind_param("sssi", $course->title, $course->slug, $course->description, $course->teacher_id);
         return $stmt->execute();
     }
 
     public function update(Course $course)
     {
-        $sql = "UPDATE courses SET title=?, description=?, teacher_id=? WHERE id=?";
+        $sql = "UPDATE courses SET title=?, slug=?, description=?, teacher_id=? WHERE id=?";
         $stmt = $this->connection->prepare($sql);
-        $stmt->bind_param("ssii", $course->title, $course->description, $course->teacher_id, $course->id);
-        return $stmt->execute();
+        $stmt->bind_param("sssii", $course->title, $course->slug, $course->description, $course->teacher_id, $course->id);
+        $stmt->execute();
+        if ($stmt->affected_rows === 0) {
+            throw new \Exception("No course found with ID {$course->id}");
+        }
+        return true;
     }
 
     public function delete($id)

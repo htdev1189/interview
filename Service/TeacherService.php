@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Model\Teacher;
 use App\Repository\TeacherRepository;
+use App\Util\HKT;
 
 class TeacherService
 {
@@ -40,17 +41,28 @@ class TeacherService
     }
 
     // Cập nhật teacher
-    public function update($teacher)
+    public function update(Teacher $teacher)
     {
-        if (empty($teacher->name) || empty($teacher->email) || empty($teacher->phone)) {
-            throw new \Exception("Invalid data");
+        
+        if (empty($teacher->id)) {
+            throw new \Exception("Teacher ID is required");
         }
+        if (empty($teacher->name)) {
+            throw new \Exception("Name is required");
+        }
+        if (!filter_var($teacher->email, FILTER_VALIDATE_EMAIL)) {
+            throw new \Exception("Invalid email format");
+        }
+        if (empty($teacher->phone)) {
+            throw new \Exception("Phone is required");
+        }
+
         return $this->teacherRepository->update($teacher);
     }
 
     // Xóa teacher
     public function delete($id)
     {
-        return $this->teacherRepository->delete($id);
+        return $this->teacherRepository->delete((int)$id);
     }
 }

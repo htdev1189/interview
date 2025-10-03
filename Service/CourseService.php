@@ -22,10 +22,12 @@ class CourseService
     // Tạo course mới
     public function create($course)
     {
-        if(empty($course->title) || empty($course->teacher_id)){
-            throw new \Exception("Invalid data");
+        if (empty($course->title)) {
+            throw new \Exception("Title is required");
         }
-
+        if ($course->teacher_id === '') {
+            throw new \Exception("Teacher is required");
+        }
         return $this->courseRepository->create($course);
     }
 
@@ -38,7 +40,20 @@ class CourseService
     // Cập nhật course
     public function update($course)
     {
-        return $this->courseRepository->update($course);
+        if (empty($course->id)) {
+            throw new \Exception("course ID is required");
+        }
+        if (empty($course->title)) {
+            throw new \Exception("Title is required");
+        }
+        if ($course->teacher_id === "") {
+            throw new \Exception("Teacher is required");
+        }
+        try {
+            return $this->courseRepository->update($course);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     // Xóa course

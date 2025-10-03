@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Model\Teacher;
 use App\Connect\MySQLConnection;
+use App\Util\HKT;
 
 class TeacherRepository
 {
@@ -37,7 +38,13 @@ class TeacherRepository
         $sql = "UPDATE teachers SET name=?, email=?, phone=? WHERE id=?";
         $stmt = $this->connection->prepare($sql);
         $stmt->bind_param("sssi", $teacher->name, $teacher->email, $teacher->phone, $teacher->id);
-        return $stmt->execute();
+        $stmt->execute();
+        // Nếu $teacher->id không tồn tại trong DB, vẫn trả về true (nhưng không update bản ghi nào).
+        // Nên check affected_rows
+        if ($stmt->affected_rows === 0) {
+            throw new \Exception("No teacher found with ID {$teacher->id}");
+        }
+        return true;
     }
 
     public function delete($id)
@@ -45,7 +52,8 @@ class TeacherRepository
         $sql = "UPDATE teachers set status = 0 WHERE id=?";
         $stmt = $this->connection->prepare($sql);
         $stmt->bind_param("i", $id);
-        return $stmt->execute();
+        $stmt->execute();
+        return $stmt->affected_rows > 0; // chỉ true nếu có ít nhất 1 bản ghi bị update
     }
     // get by id
     public function getById($id)

@@ -80,11 +80,10 @@ class StudentController extends Controller
     public function update(Request $request)
     {
         $student = new Student(
-            $request->input('id'),
-            $request->input('name'),
-            $request->input('email'),
-            $request->input('phone'),
-            $request->input('created_at')
+            (int) $request->input('id'),
+            trim($request->input('name')),
+            trim($request->input('email')),
+            trim($request->input('phone'))
         );
         try {
             $this->studentService->updateStudent($student);
@@ -93,6 +92,19 @@ class StudentController extends Controller
             exit;
         } catch (\Exception $e) {
             $_SESSION['error'] = $e->getMessage();
+            header("Location: /interview/students");
+            exit;
+        }
+    }
+    public function destroy($id){
+        $deleted = $this->studentService->deleteStudent($id);
+
+        if ($deleted) {
+            $_SESSION['success'] = "Student $id deleted successfully.";
+            header("Location: /interview/students");
+            exit;
+        } else {
+            $_SESSION['success'] = "Failed to delete student !!!";
             header("Location: /interview/students");
             exit;
         }
