@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Core;
+use App\Util\HKT;
 
 abstract class Controller
 {

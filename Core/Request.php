@@ -2,6 +2,8 @@
 
 namespace App\Core;
 
+use App\Util\HKT;
+
 class Request
 {
     /**
@@ -145,5 +147,23 @@ class Request
     public function all(): array
     {
         return array_merge($this->get, $this->post);
+    }
+
+
+
+
+    // validate
+    public function validate(array $rules)
+    {
+        $validator = new \App\Core\Validator($this->all(), $rules);
+        // HKT::dd($validator);
+
+        if ($validator->fails()) {
+            # code...
+            $_SESSION['errors'] = $validator->errors();
+            header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
+            exit;
+        }
+        return $this->all();
     }
 }

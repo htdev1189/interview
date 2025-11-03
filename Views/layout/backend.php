@@ -1,17 +1,7 @@
 <!-- layout/backend.php -->
 <?php session_start(); ?>
 <!-- flash session -->
-<?php if(!empty($_SESSION['success'])) { ?>
-<div class="alert alert-success" role="alert">
-  <?= $_SESSION['success']?>
-</div>
-<?php unset($_SESSION['success']); } ?>
 
-<?php if(!empty($_SESSION['error'])) { ?>
-<div class="alert alert-danger" role="alert">
-  <?= $_SESSION['error']?>
-</div>
-<?php unset($_SESSION['error']); } ?>
 
 <!doctype html>
 <html lang="en">

@@ -8,66 +8,73 @@ use App\Repository\StudentRepository;
 
 class StudentService
 {
-    // Business logic layer
+    private StudentRepository $studentRepository;
 
-    private $studentRepository;
-    public function __construct(StudentRepository $studentRepository)
+    public function __construct()
     {
-        $this->studentRepository = $studentRepository;
+        $this->studentRepository = new StudentRepository();
     }
 
-    // get all students
-    public function getAllStudents()
+    /** Lấy tất cả sinh viên */
+    public function getAllStudents(): array
     {
         return $this->studentRepository->findAll();
     }
 
-    // get student by id
-    public function getStudentById($id)
+    /** Lấy sinh viên theo ID */
+    public function getStudentById(int $id): ?array
     {
         $student = $this->studentRepository->findById($id);
-        if (!$student) {
-            return null; // hoặc throw new Exception("Student not found");
-        }
-        return $student;
+        return $student ?: null;
     }
 
-    // create student
-    public function createStudent($student)
+    /** Tạo sinh viên mới */
+    public function createStudent(array $data): int
     {
         try {
-            $this->studentRepository->create($student);
-        } catch (\Exception $e) {
-            throw $e; // tiếp tục ném ra để Controller bắt
+            return $this->studentRepository->create($data);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException("Lỗi khi tạo sinh viên: " . $e->getMessage());
         }
     }
 
-    // update student
-    public function updateStudent($student)
+    /** Cập nhật sinh viên */
+    public function updateStudent(array $data): bool
     {
+        if (empty($data['id'])) {
+            throw new \InvalidArgumentException("Thiếu ID sinh viên");
+        }
+
         try {
-            return $this->studentRepository->update($student);
-        } catch (\Exception $e) {
-            throw $e;
+            return $this->studentRepository->update((int) $data['id'], $data);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException("Lỗi khi cập nhật sinh viên: " . $e->getMessage());
         }
     }
 
-    // delete student
-    public function deleteStudent($id)
+    /** Xóa sinh viên */
+    public function deleteStudent(int $id): bool
     {
-        if (empty($id)) {
-            throw new \Exception("Invalid data");
+        if (!$id) {
+            throw new \InvalidArgumentException("ID không hợp lệ");
         }
-        return $this->studentRepository->delete($id);
+
+        try {
+            return $this->studentRepository->delete($id);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException("Lỗi khi xóa sinh viên: " . $e->getMessage());
+        }
     }
 
-    public function registerCourse($studentId, $courseId)
-    {
-        return $this->studentRepository->registerCourse($studentId, $courseId);
-    }
-
-    public function getStudentWithCourses($id)
+    /** Lấy sinh viên cùng khóa học */
+    public function getStudentWithCourses(int $id): ?array
     {
         return $this->studentRepository->findWithCourses($id);
+    }
+
+    /** Đăng ký khóa học cho sinh viên */
+    public function registerCourse(int $studentId, int $courseId): bool
+    {
+        return $this->studentRepository->registerCourse($studentId, $courseId);
     }
 }
