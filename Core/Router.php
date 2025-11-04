@@ -9,6 +9,11 @@ class Router
     public static array $routes = [];
     public static array $namedRoutes = [];
 
+    public static array $middlewares = [];
+    public static array $groupMiddlewares = [];
+    public static array $currentGroupMiddleware = [];
+
+
     /** Chuẩn hóa đường dẫn */
     public static function normalizePath(string $p): string
     {
@@ -20,6 +25,13 @@ class Router
     {
         $normalized = self::normalizePath($path);
         self::$routes['GET'][$normalized] = $action;
+
+        // Nếu đang trong group middleware thì gán luôn
+        if (!empty(self::$currentGroupMiddleware)) {
+            self::$middlewares['GET'][$normalized] = self::$currentGroupMiddleware;
+        }
+
+
         return new RouteDefinition('GET', $normalized, $action);
     }
 
@@ -28,6 +40,12 @@ class Router
     {
         $normalized = self::normalizePath($path);
         self::$routes['POST'][$normalized] = $action;
+
+        // Nếu đang trong group middleware thì gán luôn
+        if (!empty(self::$currentGroupMiddleware)) {
+            self::$middlewares['POST'][$normalized] = self::$currentGroupMiddleware;
+        }
+
         return new RouteDefinition('POST', $normalized, $action);
     }
 
@@ -36,6 +54,12 @@ class Router
     {
         $normalized = self::normalizePath($path);
         self::$routes['PUT'][$normalized] = $action;
+
+        // Nếu đang trong group middleware thì gán luôn
+        if (!empty(self::$currentGroupMiddleware)) {
+            self::$middlewares['PUST'][$normalized] = self::$currentGroupMiddleware;
+        }
+
         return new RouteDefinition('PUT', $normalized, $action);
     }
 
@@ -44,6 +68,13 @@ class Router
     {
         $normalized = self::normalizePath($path);
         self::$routes['DELETE'][$normalized] = $action;
+
+        // Nếu đang trong group middleware thì gán luôn
+        if (!empty(self::$currentGroupMiddleware)) {
+            self::$middlewares['DELETE'][$normalized] = self::$currentGroupMiddleware;
+        }
+
+
         return new RouteDefinition('DELETE', $normalized, $action);
     }
 
@@ -67,6 +98,16 @@ class Router
                     if (!class_exists($controllerClass)) {
                         throw new \Exception("Controller not found: $controllerClass");
                     }
+
+                    // ✅ chạy middleware trước khi gọi controller
+                    $middlewares = self::$middlewares[$method][$route] ?? [];
+                    foreach ($middlewares as $mw) {
+                        $class = "App\\Middleware\\{$mw}";
+                        if (class_exists($class)) {
+                            (new $class)->handle($request);
+                        }
+                    }
+
 
                     $controller = new $controllerClass();
 
@@ -137,5 +178,27 @@ class Router
 
         header("Location: $url");
         exit;
+    }
+
+    public static function group(array $options, callable $callback): void
+    {
+        $middleware = $options['middleware'] ?? null;
+
+        if ($middleware) {
+            $middlewares = is_array($middleware) ? $middleware : [$middleware];
+            self::$currentGroupMiddleware = array_merge(self::$currentGroupMiddleware, $middlewares);
+        }
+
+        // gọi callback để đăng ký các route bên trong group
+        $callback();
+
+        // xóa middleware group sau khi đăng ký xong
+        if ($middleware) {
+            self::$currentGroupMiddleware = array_slice(
+                self::$currentGroupMiddleware,
+                0,
+                count(self::$currentGroupMiddleware) - count((array)$middleware)
+            );
+        }
     }
 }

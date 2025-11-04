@@ -65,10 +65,10 @@ abstract class Model
         $setPart = implode(',', array_map(fn($key) => "$key = ?", array_keys($fields)));
         $sql = "UPDATE {$this->table} SET {$setPart} WHERE id = ?";
 
-        
-        
+
+
         $stmt = $this->connection->prepare($sql);
-        
+
         $types = str_repeat('s', count($fields)) . 'i';
         $values = array_values($fields);
         $values[] = $id;
@@ -168,5 +168,42 @@ abstract class Model
         $this->wheres = [];
 
         return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * Lấy bản ghi đầu tiên theo điều kiện WHERE
+     */
+    public function first(): ?array
+    {
+        $sql = "SELECT * FROM {$this->table}";
+        $params = [];
+        $types = '';
+
+        if (!empty($this->wheres)) {
+            $whereSql = [];
+            foreach ($this->wheres as $where) {
+                [$column, $operator, $value] = $where;
+                $whereSql[] = "$column $operator ?";
+                $params[] = $value;
+                $types .= 's';
+            }
+            $sql .= " WHERE " . implode(' AND ', $whereSql);
+        }
+
+        $sql .= " LIMIT 1";
+
+        $stmt = $this->connection->prepare($sql);
+
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        // reset điều kiện để không ảnh hưởng query sau
+        $this->wheres = [];
+
+        return $result->fetch_assoc() ?: null;
     }
 }
