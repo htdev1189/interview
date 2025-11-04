@@ -12,15 +12,15 @@ Router::get('/', 'HomeController@index');
 
 // student
 Router::get('/students','StudentController@index');
-Router::get('/students/create','StudentController@create');
+Router::get('/students/create','StudentController@create')->name('students.create');
 Router::post('/students','StudentController@store');
 Router::get('/students/edit/{id}','StudentController@edit');
 Router::post('/students/update', 'StudentController@update');
 Router::post('/students/delete/{id}', 'StudentController@destroy');
 
 // teacher
-Router::get('/teachers', 'TeacherController@index');
-Router::get('/teachers/create','TeacherController@create');
+Router::get('/teachers', 'TeacherController@index')->name('teachers.index');
+Router::get('/teachers/create','TeacherController@create')->name('teachers.create');
 Router::post('/teachers','TeacherController@store');
 Router::get('/teachers/edit/{id}','TeacherController@edit');
 Router::post('/teachers/update', 'TeacherController@update');

@@ -7,174 +7,59 @@ use App\Util\HKT;
 class Router
 {
     public static array $routes = [];
+    public static array $namedRoutes = [];
 
-    /**
-     * Chuẩn hóa đường dẫn bằng cách loại bỏ dấu gạch chéo ở cuối.
-     * `normalizePath('/users/')` → `/users`
-     * `normalizePath('')` → `/`
-     * `normalizePath('/')` → `/`
-     */
+    /** Chuẩn hóa đường dẫn */
     public static function normalizePath(string $p): string
     {
         return rtrim($p, '/') ?: '/';
     }
 
-
-    /**
-     * Đăng ký một router GET vào hệ thống router
-     * Example
-     * ```php
-     * $router->get('/student', 'StudentController@index');
-     * $router->get('/teacher', 'TeacherController@index');
-     * $router = [
-     *      'GET' => [
-     *              '/users' => 'StudentController@index',
-     *              '/teacher' => 'TeacherController@index',
-     *              ]
-     * ]
-     * ```
-     */
-    public static function get(string $path, string $action)
+    /** Đăng ký route GET */
+    public static function get(string $path, string $action): RouteDefinition
     {
-        self::$routes['GET'][self::normalizePath($path)] = $action;
+        $normalized = self::normalizePath($path);
+        self::$routes['GET'][$normalized] = $action;
+        return new RouteDefinition('GET', $normalized, $action);
     }
 
-    /**
-     * Đăng ký một route POST vào hệ thống định tuyến.
-     *
-     * @param string $path Đường dẫn URL cần đăng ký
-     * @param string $action Hàm hoặc controller xử lý khi route được gọi
-     */
-    public static function post(string $path, string $action)
+    /** Đăng ký route POST */
+    public static function post(string $path, string $action): RouteDefinition
     {
-        self::$routes['POST'][self::normalizePath($path)] = $action;
+        $normalized = self::normalizePath($path);
+        self::$routes['POST'][$normalized] = $action;
+        return new RouteDefinition('POST', $normalized, $action);
     }
 
-
-    /**
-     * Đăng ký một route PUT vào hệ thống định tuyến.
-     *
-     * @param string $path Đường dẫn URL cần đăng ký
-     * @param string $action Hàm hoặc controller xử lý khi route được gọi
-     */
-    public function put(string $path, string $action)
+    /** Đăng ký route PUT */
+    public static function put(string $path, string $action): RouteDefinition
     {
-        $this->routes['PUT'][$this->normalizePath($path)] = $action;
+        $normalized = self::normalizePath($path);
+        self::$routes['PUT'][$normalized] = $action;
+        return new RouteDefinition('PUT', $normalized, $action);
     }
 
-
-    /**
-     * Đăng ký một route DELETE vào hệ thống định tuyến.
-     *
-     * @param string $path Đường dẫn URL cần đăng ký
-     * @param string $action Hàm hoặc controller xử lý khi route được gọi
-     */
-    public function delete(string $path, string $action)
+    /** Đăng ký route DELETE */
+    public static function delete(string $path, string $action): RouteDefinition
     {
-        $this->routes['DELETE'][$this->normalizePath($path)] = $action;
+        $normalized = self::normalizePath($path);
+        self::$routes['DELETE'][$normalized] = $action;
+        return new RouteDefinition('DELETE', $normalized, $action);
     }
 
-
-
-    /**
-     * Xử lý request HTTP và điều hướng đến controller/action tương ứng.
-     * 
-     * - Lấy phương thức HTTP (GET, POST, PUT, DELETE...) và đường dẫn từ request
-     * - Tìm action tương ứng trong danh sách route đã đăng ký
-     * - Nếu không tìm thấy → trả về 404
-     * - Nếu controller không tồn tại → trả về 500
-     * - Nếu hợp lệ → gọi phương thức xử lý trong controller và truyền đối tượng Request
-     */
-    public static function dispatch1(Request $request)
-    {
-        // get current method
-        $method = $request->getMethod();
-        // get path
-        $path = self::normalizePath($request->getPath());
-        // action
-        $action = self::$routes[$method][$path] ?? null;
-
-        if (!$action) {
-            http_response_code(404);
-            echo '404 Not Found';
-            return;
-        }
-        /**
-         * $action : TeacherController@index
-         * $controllerName : TeacherController
-         * $methodName : index
-         */
-
-        [$controllerName, $methodName] = explode('@', $action);
-
-        $controllerClass = 'App\\Controller\\' . $controllerName;
-
-        if (!class_exists($controllerClass)) {
-            http_response_code(500);
-            echo 'Controller not found: ' . $controllerClass;
-            return;
-        }
-
-        $controller = new $controllerClass();
-
-        /**
-         * call_user_func
-         * 
-         * ```php
-         * // Calling a global function
-         *  function greet($name) {
-         *       echo "Hello, $name!\n";
-         *   }
-         *   call_user_func('greet', 'Alice'); //Hello, Alice! 
-
-         * // Calling an object method
-         * class MyClass {
-         *     public function sayHello($name) {
-         *           echo "MyClass says hello to $name!\n";
-         *     }
-         * 
-         *     public static function staticHello($name) {
-         *           echo "MyClass static method says hello to $name!\n";
-         *     }
-         * }
-         * 
-         * $obj = new MyClass();
-         * call_user_func(array($obj, 'sayHello'), 'Bob'); // MyClass says hello to Bob <áp dụng cho project này>
-         * 
-         * // Calling a static class method
-         * call_user_func(array('MyClass', 'staticHello'), 'Charlie'); // MyClass static method says hello to Charlie
-         * call_user_func('MyClass::staticHello', 'David'); // MyClass static method says hello to David
-         * 
-         */
-
-        try {
-            if (!method_exists($controller, $methodName)) {
-                throw new \Exception("Method $methodName not found in $controllerClass");
-            }
-            echo call_user_func([$controller, $methodName], $request);
-        } catch (\Throwable $e) {
-            http_response_code(500);
-            echo "Error: " . $e->getMessage();
-        }
-    }
-
+    /** Dispatch - xử lý request */
     public static function dispatch(Request $request)
     {
         $method = $request->getMethod();
         $path   = self::normalizePath($request->getPath());
-
-        // Lấy tất cả routes đã đăng ký cho method hiện tại
         $routes = self::$routes[$method] ?? [];
 
         foreach ($routes as $route => $action) {
-            // Biến {id} thành regex (?P<id>[^/]+)
             $pattern = "@^" . preg_replace('@\{([\w]+)\}@', '(?P<$1>[^/]+)', $route) . "$@";
 
             if (preg_match($pattern, $path, $matches)) {
-                // Lấy params (lọc ra chỉ giữ các key string)
                 $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
-                // Tách controller & method
                 [$controllerName, $methodName] = explode('@', $action);
                 $controllerClass = 'App\\Controller\\' . $controllerName;
 
@@ -189,11 +74,10 @@ class Router
                         throw new \Exception("Method $methodName not found in $controllerClass");
                     }
 
-                    // 🚀 Auto mapping Request + params bằng Reflection
                     $reflection = new \ReflectionMethod($controller, $methodName);
                     $args = [];
+
                     foreach ($reflection->getParameters() as $param) {
-                        // Nếu param type-hint là Request thì inject $request
                         if (
                             $param->getType()
                             && !$param->getType()->isBuiltin()
@@ -201,15 +85,12 @@ class Router
                         ) {
                             $args[] = $request;
                         } elseif (isset($params[$param->getName()])) {
-                            // Nếu param tồn tại trong {params}, inject giá trị
                             $args[] = $params[$param->getName()];
                         } else {
-                            // Nếu không có thì truyền null
                             $args[] = null;
                         }
                     }
 
-                    // Gọi controller action với đúng args
                     return call_user_func_array([$controller, $methodName], $args);
                 } catch (\Throwable $e) {
                     http_response_code(500);
@@ -219,8 +100,30 @@ class Router
             }
         }
 
-        // Nếu không có route khớp
         http_response_code(404);
         echo "404 Not Found";
+    }
+
+    /** Trả về URL theo route name */
+    public static function url(string $name, array $params = []): ?string
+    {
+        if (!isset(self::$namedRoutes[$name])) {
+            return null;
+        }
+
+        $path = self::$namedRoutes[$name]['path'];
+
+        foreach ($params as $key => $value) {
+            $path = str_replace('{' . $key . '}', $value, $path);
+        }
+
+        // Tự động thêm base path (vd: /interview)
+        $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+        return $base . $path;
+    }
+
+    public static function hasRoute(string $name): bool
+    {
+        return isset(self::$namedRoutes[$name]);
     }
 }
