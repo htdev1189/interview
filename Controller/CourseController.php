@@ -1,154 +1,103 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Controller;
 
-use App\Model\Course;
-use App\Repository\CourseRepository;
-use App\Repository\TeacherRepository;
-use App\Service\CourseService;
-use App\Service\TeacherService;
 use App\Core\Controller;
 use App\Core\Request;
+use App\Core\Router;
+use App\Service\CourseService;
+use App\Service\TeacherService;
+use App\Util\HKT;
 
-class CourseController extends Controller {
-    private CourseService $courseService;
+class CourseController extends Controller
+{
+    private CourseService $service;
     private TeacherService $teacherService;
+
     public function __construct()
     {
-        $repository = new CourseRepository();
-        $this->courseService = new CourseService(new CourseRepository());
-        $this->teacherService = new TeacherService(new TeacherRepository);
+        $this->service = new CourseService();
+        $this->teacherService = new TeacherService();
     }
-    public function index(){
-        $cousers = $this->courseService->getAll();
-        $this->render('course/list', [
-            'title'    => 'Danh sách khóa học',
-            'courses' => $cousers
-        ]);
-    }
-    public function create()
+
+    public function index(): void
     {
-        $this->render('course/create', [
-            'title'    => 'Add new course',
-            'teachers' => $this->teacherService->getAllTeachers()
+        $courses = $this->service->getAllCourses();
+        $this->render('course/list',[
+            'title' => "List Courses",
+            'courses' => $courses
         ]);
     }
+
+    public function create(): void
+    {
+        $teachers = $this->teacherService->getAll();
+        $this->render('course/create',[
+            'title' => "Create New Course",
+            'teachers' => $teachers,
+        ]);
+    }
+
     public function store(Request $request)
     {
-        $course = new Course(
-            null,
-            $request->input('title'),
-            $request->input('description'),
-            $request->input('teacher_id'),
-        );
+        $validated = $request->validate([
+            'title' => 'required',
+            'teacher_id' => 'required'
+        ]);
+
         try {
-            $this->courseService->create($course);
-            $_SESSION['success'] = "create course success !!!";
-            header("Location: /interview/courses");
-            exit;
-        } catch (\Exception $e) {
+            $this->service->store($validated);
+            $_SESSION['success'] = "Created Course Success!";
+        } catch (\Throwable $e) {
             $_SESSION['error'] = $e->getMessage();
-            header("Location: /interview/courses");
-            exit;
         }
+        Router::redirect('course.show');
     }
 
-    public function edit($id)
+    public function destroy(int $id)
     {
-        $course = $this->courseService->getCourseById($id);
-        if ($course) {
-            $this->render("course/edit", [
-                'title'    => 'Edit course',
-                'course' => $course,
-                'teachers' => $this->teacherService->getAllTeachers()
-            ]);
-            return;
+        try {
+            $deleted = $this->service->deleteCourse($id);
+            $_SESSION['success'] = "Course deleted successfully";
+        } catch (\Throwable $e) {
+            $_SESSION['error'] = $e->getMessage();
         }
-        $this->render("error/404", [
-            'error' => "course not found !!!"
+
+        Router::redirect('course.show');
+    }
+
+    public function edit(int $id): void
+    {
+        $course = $this->service->findCourseById($id);
+        if (!$course) {
+            $_SESSION['error'] = "Course not exist !!! ";
+            Router::redirect('course.show');
+        }
+        $this->render('course/edit', [
+            'title' => "edit course",
+            'course' => $course,
+            'teachers' => $this->teacherService->getAll(),
         ]);
     }
-    public function update(Request $request)
+
+    public function update(Request $request): void
     {
-        $course = new Course(
-            (int) $request->input('id'),
-            trim($request->input('title')),
-            trim($request->input('description')),
-            (int) $request->input('teacher_id')
-        );
+    
+        $validated = $request->validate([
+            'id' => 'required',
+            'title'  => "required|unique:courses,title,{$request->input('id')}",
+            'teacher_id' => "required"
+        ]);
+
         try {
-            $this->courseService->update($course);
-            $_SESSION['success'] = "update course success !!!";
-            header("Location: /interview/courses");
-            exit;
+            // HKT::dd($validated);
+            $this->service->update($validated);
+            $_SESSION['success'] = "Cập nhật giáo viên thành công!";
         } catch (\Exception $e) {
             $_SESSION['error'] = $e->getMessage();
-            header("Location: /interview/courses");
-            exit;
         }
+        Router::redirect('course.show');
     }
-    // public function list(){
-    //     $cousers = $this->courseService->getAll();
-    //     $this->render('course/list', [
-    //         'title'    => 'Danh sách khóa học',
-    //         'courses' => $cousers
-    //     ]);
-    // }
-
-    // // create form
-    // public function createForm(){
-    //     $this->render('course/create', [
-    //         'title'    => 'Thêm mới khóa học',
-    //         'teachers' => $this->teacherRepository->getAll()
-    //     ]);
-    // }
-
-    // // store
-    // public function store(){
-    //     $course = new Course(
-    //         null,
-    //         $_POST['title'],
-    //         $_POST['description'],
-    //         $_POST['teacher_id'],
-    //         null
-    //     );
-    //     $this->courseService->create($course);
-    //     header("Location: /interview/courses");
-    //     exit;
-    // }
-
-    // // xóa / ẩn khóa học
-    // public function delete(){
-    //     $id = $_POST['id'];
-    //     $this->courseService->delete($id);        
-    //     header("Location: /interview/courses");
-    //     exit;
-    // }
-
-    // public function editForm($id){
-    //     $course = $this->courseService->getCourseById($id);
-    //     if (!$course) {
-    //         echo "Không tìm thấy khóa học.";
-    //         return;
-    //     }
-    //     $this->render('course/edit', [
-    //         'title'    => 'Cập nhật thông tin khóa học',
-    //         'course' => $course,
-    //         'teachers' => $this->teacherRepository->getAll()
-    //     ]);
-    // }
-    // public function update(){
-    //     $course = new Course(
-    //         $_POST['id'],
-    //         $_POST['title'],
-    //         $_POST['description'],
-    //         $_POST['teacher_id'],
-    //         $_POST['created_at']
-    //     );
-    //     $this->courseService->update($course);
-    //     header("Location: /interview/courses");
-    //     exit;
-    // }
-
-    
-
 }

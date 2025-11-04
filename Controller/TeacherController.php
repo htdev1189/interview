@@ -7,6 +7,7 @@ use App\Repository\TeacherRepository;
 use App\Service\TeacherService;
 use App\Core\Controller;
 use App\Core\Request;
+use App\Core\Router;
 use App\Util\HKT;
 
 class TeacherController extends Controller
@@ -20,47 +21,93 @@ class TeacherController extends Controller
     }
 
     // list views
-    public function index(){
+    public function index()
+    {
 
         // get all teacher from db
         $teachers = $this->service->getAll();
 
         // render views
-        $this->render("teacher/list",[
+        $this->render("teacher/list", [
             "title" => "List Teacher",
             "teachers" => $teachers
         ]);
-
     }
 
     // form create
-    public function create(){
+    public function create()
+    {
         // render views
-        $this->render("teacher/create",[
+        $this->render("teacher/create", [
             "title" => "Create Teacher",
         ]);
     }
 
     // store
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $validated = $request->validate(
             [
-                'id'    => 'required|numeric',
                 'name'  => 'required',
-                'email' => "required|email|unique:techears,email,{$request->input('id')}",
-                'phone' => "required|unique:techears,phone,{$request->input('id')}"
+                'email' => "required|email|unique:teachers,email",
+                'phone' => "required|unique:teachers,phone"
             ]
         );
 
         try {
             $this->service->create($validated);
-            $_SESSION['success'] = "Tạo sinh viên thành công!";
+            $_SESSION['success'] = "Tạo giáo viên thành công!";
         } catch (\Exception $e) {
-            $_SESSION['error'] = "Lỗi khi tạo sinh viên: " . $e->getMessage();
+            $_SESSION['error'] = "Lỗi khi tạo giáo viên: " . $e->getMessage();
         }
 
-        header("Location: /interview/students");
-        exit;
+        Router::redirect('teachers.index');
+    }
+
+    public function destroy($id)
+    {
+        $deleted = $this->service->delete($id);
+        if ($deleted) {
+            $_SESSION['success'] = "teacher deleted successfully.";
+        } else {
+            $_SESSION['error'] = "Failed to delete teacher !!!";
+        }
+        Router::redirect('teachers.index');
+    }
+
+    // form edit
+    public function edit($id)
+    {
+        $teacher = $this->service->getById($id);
+        if (!$teacher) {
+            $_SESSION['error'] = "Teacher not exist !!! ";
+            Router::redirect('teachers.index');
+        }
+        // render views
+        $this->render("teacher/edit", [
+            "title" => "Edit Teacher",
+            "teacher" => $teacher,
+        ]);
+    }
+
+    // update
+    public function update(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => 'required',
+            'name'  => 'required',
+            'email' => "required|email|unique:teachers,email,{$request->input('id')}",
+            'phone' => "required|unique:teachers,phone,{$request->input('id')}"
+        ]);
+
+        try {
+            // HKT::dd($validated);
+            $this->service->update($validated);
+            $_SESSION['success'] = "Cập nhật giáo viên thành công!";
+        } catch (\Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+        }
+        Router::redirect('teachers.index');
     }
 
     // public function index()

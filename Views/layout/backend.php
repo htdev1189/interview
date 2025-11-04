@@ -1,8 +1,4 @@
 <!-- layout/backend.php -->
-<?php session_start(); ?>
-<!-- flash session -->
-
-
 <!doctype html>
 <html lang="en">
 
@@ -37,7 +33,7 @@
           </li>
           <li class="nav-item">
             <a class="nav-link <?= ($_SERVER['REQUEST_URI'] === '/interview/courses') ? 'active' : '' ?>" 
-               href="/interview/courses">Courses</a>
+               href="<?= Router::url('course.show') ?>">Courses</a>
           </li>
         </ul>
       </div>

@@ -126,4 +126,16 @@ class Router
     {
         return isset(self::$namedRoutes[$name]);
     }
+
+    public static function redirect(string $name, array $params = []): void
+    {
+        $url = self::url($name, $params);
+
+        if (!$url) {
+            throw new \Exception("Route name '{$name}' not found.");
+        }
+
+        header("Location: $url");
+        exit;
+    }
 }

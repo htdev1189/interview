@@ -8,31 +8,31 @@ use App\Core\Request;
 use App\Core\Router;
 
 // Define routes (simple)
-Router::get('/', 'HomeController@index');
+Router::get('/', 'HomeController@index')->name('home');
 
 // student
-Router::get('/students','StudentController@index');
-Router::get('/students/create','StudentController@create')->name('students.create');
-Router::post('/students','StudentController@store');
-Router::get('/students/edit/{id}','StudentController@edit');
-Router::post('/students/update', 'StudentController@update');
-Router::post('/students/delete/{id}', 'StudentController@destroy');
+Router::get('/students','StudentController@index')->name('student.show');
+Router::get('/students/create','StudentController@create')->name('student.create');
+Router::post('/students','StudentController@store')->name('student.store');
+Router::get('/students/edit/{id}','StudentController@edit')->name('student.edit');
+Router::post('/students/update', 'StudentController@update')->name('studentupdate');
+Router::post('/students/delete/{id}', 'StudentController@destroy')->name('student.destroy');
 
 // teacher
-Router::get('/teachers', 'TeacherController@index')->name('teachers.index');
-Router::get('/teachers/create','TeacherController@create')->name('teachers.create');
-Router::post('/teachers','TeacherController@store');
-Router::get('/teachers/edit/{id}','TeacherController@edit');
-Router::post('/teachers/update', 'TeacherController@update');
-Router::post('/teachers/delete/{id}', 'TeacherController@destroy');
+Router::get('/teachers', 'TeacherController@index')->name('teacher.show');
+Router::get('/teachers/create','TeacherController@create')->name('teacher.create');
+Router::post('/teachers','TeacherController@store')->name('teacher.store');
+Router::get('/teachers/edit/{id}','TeacherController@edit')->name('teacher.edit');
+Router::post('/teachers/update', 'TeacherController@update')->name('teacher.update');
+Router::post('/teachers/delete/{id}', 'TeacherController@destroy')->name('teacher.destroy');
 
 // course
-Router::get('/courses', 'CourseController@index');
-Router::get('/courses/create','CourseController@create');
-Router::post('/courses','CourseController@store');
-Router::get('/courses/edit/{id}','CourseController@edit');
-Router::post('/courses/update', 'CourseController@update');
-Router::post('/courses/delete/{id}', 'CourseController@destroy');
+Router::get('/courses', 'CourseController@index')->name('course.show');
+Router::get('/courses/create','CourseController@create')->name('course.create');
+Router::post('/courses','CourseController@store')->name('course.store');
+Router::get('/courses/edit/{id}','CourseController@edit')->name('course.edit');
+Router::post('/courses/update', 'CourseController@update')->name('course.update');
+Router::post('/courses/delete/{id}', 'CourseController@destroy')->name('course.destroy');
 
 // Dispatch
 

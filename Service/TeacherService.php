@@ -31,6 +31,35 @@ class TeacherService
         }
     }
 
+    // delete teacher
+    public function delete($id){
+        try {
+            return $this->repo->delete($id);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException("Lỗi khi xóa teacher: " . $e->getMessage());
+        }
+    }
+    // Lấy teacher theo id
+    public function getById($id)
+    {
+        try {
+            return $this->repo->findById($id);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException("Lỗi khi xóa teacher: " . $e->getMessage());
+        }
+    }
+
+    // update
+    public function update($data){
+        try {
+            return $this->repo->update((int) $data['id'], $data);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException("Lỗi khi cập nhật giáo viên: " . $e->getMessage());
+        }
+    } 
+
+    // 
+
     // private $teacherRepository;
 
     // public function __construct(TeacherRepository $teacherRepository)

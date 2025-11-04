@@ -65,12 +65,14 @@ abstract class Model
         $setPart = implode(',', array_map(fn($key) => "$key = ?", array_keys($fields)));
         $sql = "UPDATE {$this->table} SET {$setPart} WHERE id = ?";
 
-
+        
+        
         $stmt = $this->connection->prepare($sql);
-
+        
         $types = str_repeat('s', count($fields)) . 'i';
         $values = array_values($fields);
         $values[] = $id;
+        // HKT::dd($types);
 
         $stmt->bind_param($types, ...$values);
 
@@ -86,7 +88,11 @@ abstract class Model
      */
     public function delete(int $id)
     {
-        $sql = "DELETE FROM {$this->table} WHERE id = ?";
+        // $sql = "DELETE FROM {$this->table} WHERE id = ?";
+        // $stmt = $this->connection->prepare($sql);
+        // $stmt->bind_param('i', $id);
+
+        $sql = "update {$this->table} set status = 0 where id = ?";
         $stmt = $this->connection->prepare($sql);
         $stmt->bind_param('i', $id);
 
@@ -100,9 +106,10 @@ abstract class Model
     /**
      * Lấy tất cả bản ghi
      */
-    public function all()
+    public function all($where = '')
     {
-        $result = $this->connection->query("SELECT * FROM {$this->table}");
+        $w = $where != '' ? "where {$where}" : "";
+        $result = $this->connection->query("SELECT * FROM {$this->table} {$w}");
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -111,7 +118,7 @@ abstract class Model
      */
     public function find(int $id): ?array
     {
-        $stmt = $this->connection->prepare("SELECT * FROM {$this->table} WHERE id = ?");
+        $stmt = $this->connection->prepare("SELECT * FROM {$this->table} WHERE id = ? and status = 1 limit 0, 1");
         $stmt->bind_param('i', $id);
         $stmt->execute();
 

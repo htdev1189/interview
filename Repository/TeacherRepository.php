@@ -32,6 +32,31 @@ class TeacherRepository
             throw new \RuntimeException("Lỗi khi thêm giáo viên: " . $e->getMessage());
         }
     }
+
+    // delete
+    public function delete($id){
+        try {
+           return $this->model->delete($id);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException("Lỗi khi xóa giáo viên: " . $e->getMessage());
+        }
+    }
+    
+    // get info
+    public function findById($id){
+        try {
+            return $this->model->find($id);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException("Lỗi khi xóa giáo viên: " . $e->getMessage());
+        }
+    }
+    public function update($id, $data){
+        try {
+            return $this->model->update($id, $data);
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Lỗi khi cập nhật sinh viên: " . $e->getMessage());
+        }
+    }
     // private $connection;
 
     // public function __construct()

@@ -1,70 +1,60 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Service;
 
-use App\Model\Course;
 use App\Repository\CourseRepository;
 
 class CourseService
 {
-    private $courseRepository;
+    private CourseRepository $repository;
 
-    public function __construct(CourseRepository $courseRepository)
+    public function __construct()
     {
-        $this->courseRepository = $courseRepository;
+        $this->repository = new CourseRepository();
     }
 
-    // Lấy danh sách course
-    public function getAll()
+    /** Lấy danh sách khóa học */
+    public function getAllCourses(): array
     {
-        return $this->courseRepository->getAll();
+        return $this->repository->getAll();
     }
 
-    // Tạo course mới
-    public function create($course)
+    /** Lấy chi tiết 1 khóa học */
+    public function findCourseById(int $id): ?array
     {
-        if (empty($course->title)) {
-            throw new \Exception("Title is required");
-        }
-        if ($course->teacher_id === '') {
-            throw new \Exception("Teacher is required");
-        }
-        return $this->courseRepository->create($course);
+        return $this->repository->find($id);
     }
 
-    // Lấy course theo id
-    public function getCourseById($id)
+    /** Thêm khóa học mới */
+    public function store(array $data)
     {
-        return $this->courseRepository->findById($id);
-    }
-
-    // Cập nhật course
-    public function update($course)
-    {
-        if (empty($course->id)) {
-            throw new \Exception("course ID is required");
-        }
-        if (empty($course->title)) {
-            throw new \Exception("Title is required");
-        }
-        if ($course->teacher_id === "") {
-            throw new \Exception("Teacher is required");
-        }
         try {
-            return $this->courseRepository->update($course);
-        } catch (\Exception $e) {
-            throw $e;
+            return $this->repository->create($data);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException($e->getMessage());
         }
     }
 
-    // Xóa course
-    public function delete($id)
+    /** Cập nhật khóa học */
+    public function update(array $data): bool
     {
-        return $this->courseRepository->delete($id);
+        return $this->repository->update((int) $data['id'], $data);
     }
 
-    // Lấy danh sách course theo teacher
-    public function getCoursesByTeacher($teacherId)
+    /** Xóa khóa học */
+    public function deleteCourse(int $id)
     {
-        return $this->courseRepository->findByTeacherId($teacherId);
+        try {
+            $source = $this->findCourseById($id);
+            if ($source) {
+                return $this->repository->delete($id);
+            } else {
+                throw new \Exception("Course khong ton tai");
+            }
+        } catch (\Throwable $e) {
+            throw new \RuntimeException($e->getMessage());
+        }
     }
 }

@@ -1,11 +1,16 @@
 <!-- views/teacher/list.php -->
 
+<div class="alert alert-primary alert-sm" role="alert">
+  <div class="row">
+    <div class="col-9"><?= $title ?></div>
+    <div class="col-3 text-end"><a href="<?= Router::url('teachers.create') ?>" class="btn btn-success btn-sm">Add New</a></div>
+  </div>
+</div>
+
+
 <!-- flash session -->
 <?php
-
-use App\Core\Router;
-
- if (!empty($_SESSION['success'])) { ?>
+if (!empty($_SESSION['success'])) { ?>
   <div class="alert alert-success" role="alert">
     <div class="row">
       <div class="col md-6"><?= $_SESSION['success'] ?></div>
@@ -25,12 +30,7 @@ use App\Core\Router;
 <?php unset($_SESSION['error']);
 } ?>
 
-<div class="alert alert-primary alert-sm" role="alert">
-  <div class="row">
-    <div class="col-9"><?= $title ?></div>
-    <div class="col-3 text-end"><a href="<?= Router::url('teachers.create') ?>" class="btn btn-success btn-sm">Add New</a></div>
-  </div>
-</div>
+
 
 
 <table class="table">
@@ -51,12 +51,15 @@ use App\Core\Router;
         <td><?= $teacher['email']; ?></td>
         <td><?= $teacher['phone']; ?></td>
         <td>
-          <a href="/interview/teachers/edit/<?= $teacher['id'] ?>" class="btn btn-primary btn-sm">Edit</a>
-          <form action="/interview/teachers/delete/<?= $teacher['id'] ?>" method="POST" style="display:inline;"
+          <a href="<?= Router::url('teachers.edit', ['id' => $teacher['id']]) ?>" class="btn btn-primary btn-sm">Edit</a>
+          <form action="<?= Router::url('teachers.destroy', ['id' => $teacher['id']]) ?>"
+            method="POST"
+            style="display:inline;"
             onsubmit="return confirm('Bạn có chắc chắn muốn xóa giáo viên này không?');">
             <input type="hidden" name="id" value="<?= $teacher['id'] ?>">
             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
           </form>
+
         </td>
       </tr>
     <?php endforeach; ?>
