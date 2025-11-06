@@ -7,7 +7,7 @@ use App\Core\Router;
 <div class="alert alert-primary alert-sm" role="alert">
   <div class="row">
     <div class="col-md-9"><?= $title ?></div>
-    <div class="col text-end"><a href="<?= Router::url('students.create') ?>" class="btn btn-success btn-sm">Add New</a></div>
+    <div class="col text-end"><a href="<?= Router::url('student.create') ?>" class="btn btn-success btn-sm">Add New</a></div>
     <div class="col text-end"><a href="/interview/students/registerCourse" class="btn btn-success btn-sm">Register course</a></div>
   </div>
 </div>

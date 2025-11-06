@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Route;
 
 // Xử lý HTTP request (GET, POST, SERVER)
@@ -16,7 +17,30 @@ Router::post('/logout', 'AuthController@logout')->name('logout');
 // group yêu cầu login
 Router::group(['middleware' => 'AuthMiddleware'], function () {
     Router::get('/', 'HomeController@index')->name('home');
+
+    // student
     Router::get('/students', 'StudentController@index')->name('student.show');
+    Router::get('/students/create', 'StudentController@create')->name('student.create');
+    Router::post('/students', 'StudentController@store')->name('student.store');
+    Router::get('/students/edit/{id}', 'StudentController@edit')->name('student.edit');
+    Router::post('/students/update', 'StudentController@update')->name('studentupdate');
+    Router::post('/students/delete/{id}', 'StudentController@destroy')->name('student.destroy');
+
+    // teacher
+    Router::get('/teachers', 'TeacherController@index')->name('teacher.show');
+    Router::get('/teachers/create', 'TeacherController@create')->name('teacher.create');
+    Router::post('/teachers', 'TeacherController@store')->name('teacher.store');
+    Router::get('/teachers/edit/{id}', 'TeacherController@edit')->name('teacher.edit');
+    Router::post('/teachers/update', 'TeacherController@update')->name('teacher.update');
+    Router::post('/teachers/delete/{id}', 'TeacherController@destroy')->name('teacher.destroy');
+
+    // course
+    Router::get('/courses', 'CourseController@index')->name('course.show');
+    Router::get('/courses/create', 'CourseController@create')->name('course.create');
+    Router::post('/courses', 'CourseController@store')->name('course.store');
+    Router::get('/courses/edit/{id}', 'CourseController@edit')->name('course.edit');
+    Router::post('/courses/update', 'CourseController@update')->name('course.update');
+    Router::post('/courses/delete/{id}', 'CourseController@destroy')->name('course.destroy');
 });
 
 

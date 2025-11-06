@@ -16,7 +16,9 @@ class AuthController extends Controller
     }
     public function showLoginForm()
     {
-        $this->authRender('auth/login');
+        $this->authRender('auth/login',[
+            'title' => "Login page"
+        ]);
     }
 
     public function login(Request $request)
